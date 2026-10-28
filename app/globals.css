@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
+/* โหมดมืดแบบ InitStudio: ใช้ attribute data-home-theme="dark" แทน class dark */
+@custom-variant home-dark (&:where([data-home-theme="dark"], [data-home-theme="dark"] *));
+
+/* สีพื้นและสีตัวอักษร (ค่าเดียวกับ InitStudio) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff;
+  --foreground: #202020;
+  color-scheme: light;
+}
+
+[data-home-theme="dark"] {
+  --background: #0b0b0b;
+  --foreground: #eee;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-geist), var(--font-anuphan), Tahoma, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

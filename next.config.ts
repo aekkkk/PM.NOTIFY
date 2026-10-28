@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // build เป็นเว็บ static (โฟลเดอร์ out/) เพื่อ deploy ขึ้น Cloudflare
+  output: "export",
   turbopack: {
     rules: {
       "*.css": {

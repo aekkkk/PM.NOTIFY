@@ -1,0 +1,10 @@
+// ตั้งค่า Cloudflare Workers: เสิร์ฟไฟล์เว็บ static จากโฟลเดอร์ out/ (ได้จาก npm run build)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pm-notify",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
