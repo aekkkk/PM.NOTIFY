@@ -28,6 +28,7 @@ export type Reading = {
   pm10: number;
   temperature: number;
   humidity: number;
+  pressure: number; // ความกดอากาศ hPa (0 = ไม่มีค่า เช่นข้อมูลเก่าหรือเซนเซอร์อ่านไม่ได้)
   battery: number;
   status: DeviceStatus;
 };
@@ -102,6 +103,7 @@ function simulate(ms: number, boost: number): Reading {
   const temperature = 28.5 + 4.5 * Math.sin(((hour - 9) / 24) * 2 * Math.PI) + 0.4 * Math.sin(minutes / 23 + phase[2]);
   const humidity = 68 - 14 * Math.sin(((hour - 9) / 24) * 2 * Math.PI) + 2 * Math.sin(minutes / 29);
   // แบตเตอรี่: ชาร์จด้วยโซลาร์เซลล์ตอนกลางวัน ค่อย ๆ ลดตอนกลางคืน
+  const pressure = 1009 + 2.2 * Math.sin(((hour - 4) / 12) * 2 * Math.PI) + 1.2 * Math.sin(minutes / 900 + phase[0]);
   const battery = 72 + 18 * Math.sin(((hour - 10) / 24) * 2 * Math.PI);
   const round = (value: number) => Math.round(value * 10) / 10;
   return {
@@ -112,6 +114,7 @@ function simulate(ms: number, boost: number): Reading {
     pm10: round(pm25 * 1.42 + 4 + Math.random() * 2),
     temperature: round(temperature),
     humidity: round(Math.min(98, Math.max(20, humidity))),
+    pressure: round(pressure),
     battery: Math.round(battery),
     status: "online",
   };
@@ -214,6 +217,7 @@ function parseReading(value: unknown): Reading | null {
     pm10: num("pm10"),
     temperature: num("temperature"),
     humidity: num("humidity"),
+    pressure: Number.isFinite(num("pressure")) ? num("pressure") : 0, // ข้อมูลเก่าไม่มีฟิลด์นี้
     battery: num("battery"),
     status: raw.status === "deep_sleep" ? "deep_sleep" : "online",
   };

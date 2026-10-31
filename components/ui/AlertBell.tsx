@@ -110,7 +110,7 @@ export function AlertBell({
         aria-expanded={notifications ? open : undefined}
         aria-controls={notifications && open ? panelId : undefined}
         // แก้จากต้นฉบับ InitStudio: ลดขนาดปุ่มจาก 60px เป็น 44px ให้พอดี header
-        className="relative grid size-11 shrink-0 cursor-pointer place-items-center rounded-[12px] bg-transparent text-neutral-800 transition-[scale,background-color] duration-150 hover:bg-neutral-100 motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 home-dark:text-neutral-100 home-dark:hover:bg-white/10"
+        className="relative grid size-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-line bg-surface text-foreground transition-[scale,background-color] duration-150 hover:bg-surface-2 motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand home-dark:hover:bg-surface-2"
       >
         <motion.span animate={bellControls} style={{ transformOrigin: "50% 24%", display: "inline-flex" }}>
         <svg
@@ -150,7 +150,7 @@ export function AlertBell({
               initial={{ opacity: 0, y: reduced ? 0 : -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
-              className="absolute top-full right-0 z-40 mt-2 w-[320px] max-w-[calc(100vw-24px)] rounded-2xl border border-neutral-200 bg-neutral-100 p-2 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_4px_8px_-2px_rgb(0_0_0/0.06),0_12px_24px_-8px_rgb(0_0_0/0.12)] home-dark:border-neutral-800 home-dark:bg-neutral-800"
+              className="absolute top-full right-0 z-40 mt-2 w-[320px] max-w-[calc(100vw-24px)] card p-2"
             >
               <div className="flex items-center justify-between gap-3 px-2 pt-1 pb-2.5">
                 <span className="text-[14px] font-semibold text-neutral-800 home-dark:text-neutral-100">การแจ้งเตือนล่าสุด</span>
@@ -163,7 +163,7 @@ export function AlertBell({
                     aria-checked={soundEnabled}
                     aria-label="เปิดหรือปิดเสียงแจ้งเตือน"
                     onClick={() => onSoundEnabledChange?.(!soundEnabled)}
-                    className="relative h-6 w-10 shrink-0 cursor-pointer rounded-full bg-neutral-300 transition-colors duration-150 outline-none aria-checked:bg-sky-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 motion-reduce:transition-none home-dark:bg-neutral-600 home-dark:aria-checked:bg-sky-500"
+                    className="relative h-6 w-10 shrink-0 cursor-pointer rounded-full bg-neutral-300 transition-colors duration-150 outline-none aria-checked:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none home-dark:bg-neutral-600 "
                   >
                     <span className={cn("absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.2)] transition-transform duration-150 motion-reduce:transition-none", soundEnabled && "translate-x-4")} />
                   </button>
@@ -189,7 +189,7 @@ export function AlertBell({
                 onBlur={(event) => {
                   if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
                 }}
-                className="relative m-0 w-full cursor-pointer list-none rounded-[16px] p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500"
+                className="relative m-0 w-full cursor-pointer list-none rounded-[16px] p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
                 <AnimatePresence initial={false}>
                   {visible.map((item, index) => {

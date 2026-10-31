@@ -3,16 +3,14 @@
 // หน้าความรู้เรื่องฝุ่น ใช้ Accordion กางอ่านทีละหัวข้อ
 import { Droplets, Info, Palette, ShieldCheck, Wind } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/Accordion";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/Badge";
 import { AIR_LEVELS } from "@/lib/airQuality";
 
 export function Knowledge() {
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-[22px] font-semibold tracking-tight">ความรู้เรื่องฝุ่น</h1>
-        <p className="mt-1 text-[14px] text-neutral-500 home-dark:text-neutral-400">เรื่องที่ควรรู้ก่อนอ่านค่าจากเครื่อง PM.Notify</p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="ความรู้เรื่องฝุ่น" description="เรื่องที่ควรรู้ก่อนอ่านค่าจากเครื่อง PM.Notify" />
 
       <Accordion type="single" collapsible defaultValue="what">
         <AccordionItem value="what">

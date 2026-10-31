@@ -16,13 +16,13 @@ export type EmptyStateProps = {
   className?: string;
 };
 
-// แก้จากต้นฉบับ InitStudio: แยกคลาสปุ่มสีฟ้าไล่เฉดออกมา export เพื่อใช้เป็นปุ่มหลักทั้งเว็บ
+// แก้จากต้นฉบับ InitStudio: แยกคลาสปุ่มออกมา export เพื่อใช้เป็นปุ่มหลักทั้งเว็บ และเปลี่ยนเป็นปุ่มสีหลักของเว็บแบบเรียบแทนปุ่มฟ้าไล่เฉด
 export const primaryButton =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[10px] border border-sky-600 bg-linear-to-b from-[lab(70.687_-23.6078_-45.9483)] to-[lab(63.3038_-18.433_-51.0407)] px-4 py-2 text-[15px] leading-6 font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.38),inset_0_-1px_0_rgb(0_70_110/0.24),0_1px_2px_rgb(0_100_160/0.24)] transition-[filter,scale] duration-150 ease-out hover:brightness-[1.03] motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500";
+  "inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-[15px] leading-6 font-medium text-brand-fg transition-[filter,scale] duration-150 ease-out hover:brightness-110 motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand";
 
 function CheckoutIllustration() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 72 72" fill="none" className="size-[66px] text-[#3979e8] home-dark:text-sky-400">
+    <svg aria-hidden="true" viewBox="0 0 72 72" fill="none" className="size-[66px] text-brand">
       <path d="M6 17v46a4 4 0 0 0 4 4h31M66 17v28" stroke="currentColor" strokeOpacity=".5" strokeWidth="2" strokeLinecap="round" strokeDasharray="1 4" />
       <rect x="6" y="7" width="60" height="13" rx="4" fill="currentColor" fillOpacity=".2" stroke="currentColor" strokeWidth="2" />
       <rect x="6" y="25" width="30" height="13" rx="4" fill="currentColor" fillOpacity=".2" stroke="currentColor" strokeWidth="2" />

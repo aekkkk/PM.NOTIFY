@@ -37,9 +37,9 @@ export function SegmentedControl<T extends string>({ value, options, onChange, l
           type="button"
           aria-pressed={option.value === value}
           onClick={() => onChange(option.value)}
-          className={cn(item, "min-w-10 gap-1.5 px-3 hover:bg-foreground/5 aria-pressed:font-semibold aria-pressed:hover:bg-transparent", itemClassName)}
+          className={cn(item, "min-w-10 gap-1.5 px-3 hover:bg-foreground/5 aria-pressed:font-semibold aria-pressed:text-brand-fg aria-pressed:hover:bg-transparent", itemClassName)}
         >
-          {option.value === value && <motion.span layoutId={indicatorId} transition={spring} className={cn("absolute inset-0 rounded-[11px]", lifted)} />}
+          {option.value === value && <motion.span layoutId={indicatorId} transition={spring} className={cn("absolute inset-0 rounded-md", lifted)} />}
           {option.icon && <span aria-hidden="true" className="relative grid place-items-center [&>svg]:size-4">{option.icon}</span>}
           <span className="relative whitespace-nowrap">{option.label}</span>
         </button>

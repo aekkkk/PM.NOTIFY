@@ -3,12 +3,13 @@
 // หน้าแดชบอร์ด: ค่าฝุ่นปัจจุบัน การ์ดค่าอื่น ๆ แบนเนอร์เตือน และปุ่มเปิดการแจ้งเตือน
 import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { Battery, BatteryLow, Bell, BellOff, BellRing, CloudOff, Droplets, Factory, Gauge, Thermometer, TriangleAlert, Wind, WifiOff } from "lucide-react";
+import { Battery, BatteryLow, Bell, BellOff, BellRing, CloudOff, Droplets, Factory, Cloudy, Gauge, Thermometer, TriangleAlert, Wind, WifiOff } from "lucide-react";
 import { useData } from "@/components/DataProvider";
 import { StatCard } from "@/components/StatCard";
 import { primaryButton } from "@/components/buttons";
 import { CountBadge, StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { LeadGoal } from "@/components/ui/LeadGoal";
 import { PM25_DANGER, PM25_THRESHOLD, fmt1, fmtDate, fmtTime, getAirLevel } from "@/lib/airQuality";
 import { downloadCsv } from "@/lib/analysis";
@@ -19,15 +20,15 @@ export function Dashboard() {
   const { latest, history, level, offline, noData, loading } = data;
 
   if (loading) {
-    return <p className="py-24 text-center text-neutral-500 home-dark:text-neutral-400">กำลังเชื่อมต่อกับเครื่อง PM.Notify…</p>;
+    return <p className="py-24 text-center text-muted">กำลังเชื่อมต่อกับเครื่อง PM.Notify…</p>;
   }
 
   // ยังไม่เคยได้รับข้อมูล หรือเครื่อง offline เกิน 10 นาที → แสดง EmptyState
   if (noData || offline || !latest || !level) {
     return (
-      <div className="flex flex-col items-center gap-6">
+      <div className="card mx-auto flex w-full max-w-xl flex-col items-center gap-6 py-6">
         <EmptyState
-          icon={offline ? <WifiOff size={56} strokeWidth={1.6} className="text-[#3979e8] home-dark:text-sky-400" /> : <CloudOff size={56} strokeWidth={1.6} className="text-[#3979e8] home-dark:text-sky-400" />}
+          icon={offline ? <WifiOff size={56} strokeWidth={1.6} className="text-brand" /> : <CloudOff size={56} strokeWidth={1.6} className="text-brand" />}
           title="ยังไม่ได้รับข้อมูลจากเครื่อง"
           description={
             offline && latest
@@ -47,13 +48,14 @@ export function Dashboard() {
   const avgLevel = data.avg24 !== null ? getAirLevel(data.avg24) : null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
+      <PageHeader title="ภาพรวม" description="ค่าล่าสุดจากเครื่อง PM.Notify" />
       {/* แบนเนอร์เตือนเมื่อ PM2.5 เกินเกณฑ์ (ส้ม = เกิน 37.5, แดง = เกิน 75) */}
       {over && (
         <div
           role="alert"
           style={{ "--tone": danger ? "#e5484d" : "#ff9900" } as CSSProperties}
-          className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--tone)_35%,transparent)] bg-[color-mix(in_srgb,var(--tone)_12%,var(--background))] p-4 text-[color-mix(in_srgb,var(--tone)_88%,var(--foreground))] home-dark:text-[color-mix(in_srgb,var(--tone)_70%,var(--foreground))]"
+          className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--tone)_35%,transparent)] bg-[color-mix(in_srgb,var(--tone)_12%,var(--background))] p-4 text-[color-mix(in_srgb,var(--tone)_88%,var(--foreground))] home-dark:text-[color-mix(in_srgb,var(--tone)_70%,var(--foreground))]"
         >
           <TriangleAlert size={22} aria-hidden="true" className="mt-0.5 shrink-0" />
           <div>
@@ -63,30 +65,30 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
         {/* การ์ดหลัก: เกจ PM2.5 */}
-        <div className="flex flex-col gap-4">
-          <LeadGoal
-            className="w-full"
-            current={latest.pm25}
-            target={PM25_THRESHOLD}
-            color={level.color}
-            title="PM2.5 ตอนนี้"
-            summaryLabel="µg/m³"
-            periodLabel="ของเกณฑ์มาตรฐาน"
-            onViewReport={() => router.push("/charts")}
-            onExportData={() => downloadCsv(history)}
-          />
-          <section aria-label="ระดับคุณภาพอากาศ" className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs home-dark:border-neutral-800 home-dark:bg-neutral-900">
-            <StatusBadge status={level.badge}>{level.label}</StatusBadge>
-            <p className="mt-3 text-[14px] leading-relaxed text-neutral-600 home-dark:text-neutral-300">{level.advice}</p>
-          </section>
-        </div>
+        <LeadGoal
+          className="w-full"
+          current={latest.pm25}
+          target={PM25_THRESHOLD}
+          color={level.color}
+          title="PM2.5 ตอนนี้"
+          summaryLabel="µg/m³"
+          periodLabel="ของเกณฑ์มาตรฐาน"
+          onViewReport={() => router.push("/charts")}
+          onExportData={() => downloadCsv(history)}
+          footer={
+            <section aria-label="ระดับคุณภาพอากาศ">
+              <StatusBadge status={level.badge}>{level.label}</StatusBadge>
+              <p className="mt-3 text-[14px] leading-relaxed text-foreground/80">{level.advice}</p>
+            </section>
+          }
+        />
 
         {/* การ์ดย่อย */}
         <div className="grid grid-cols-2 content-start gap-3 sm:grid-cols-3 sm:gap-4">
-          <StatCard title="PM1.0" value={latest.pm1} unit="µg/m³" icon={<Wind />} accent="#a5a3ff" />
-          <StatCard title="PM10" value={latest.pm10} unit="µg/m³" icon={<Factory />} accent="#a5a3ff" />
+          <StatCard title="PM1.0" value={latest.pm1} unit="µg/m³" icon={<Wind />} accent="#8a7f6a" />
+          <StatCard title="PM10" value={latest.pm10} unit="µg/m³" icon={<Factory />} accent="#8a7f6a" />
           <StatCard
             title="PM2.5 เฉลี่ย 24 ชม."
             value={data.avg24 !== null ? Math.round(data.avg24 * 10) / 10 : null}
@@ -97,6 +99,7 @@ export function Dashboard() {
           />
           <StatCard title="อุณหภูมิ" value={latest.temperature} unit="°C" icon={<Thermometer />} accent="#ff9900" />
           <StatCard title="ความชื้น" value={latest.humidity} unit="%RH" icon={<Droplets />} accent="#00cceb" footer={latest.humidity > 85 ? "ความชื้นสูง ค่าฝุ่นอาจสูงเกินจริง" : undefined} />
+          <StatCard title="ความกดอากาศ" value={latest.pressure > 0 ? latest.pressure : null} unit="hPa" icon={<Cloudy />} accent="#6b7fd7" />
           <StatCard
             title="แบตเตอรี่"
             value={latest.battery}
@@ -109,7 +112,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-100 p-4 sm:flex-row sm:items-center sm:justify-between home-dark:border-neutral-800 home-dark:bg-neutral-800">
+      <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="flex items-center gap-2 text-[14px]">
           PM2.5 เกินเกณฑ์วันนี้
           <CountBadge count={data.todayCount} variant={data.todayCount ? "emphasis" : "default"} label={`วันนี้ PM2.5 เกินเกณฑ์ ${data.todayCount} ครั้ง`} />
@@ -126,19 +129,19 @@ export function Dashboard() {
 function BrowserNotificationButton() {
   const { browserPermission, enableBrowserNotifications } = useData();
   if (browserPermission === "unsupported") {
-    return <p className="text-[13px] text-neutral-500">เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน</p>;
+    return <p className="text-[13px] text-muted">เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน</p>;
   }
   if (browserPermission === "granted") {
     return (
-      <p className="flex items-center gap-2 text-[14px] text-neutral-600 home-dark:text-neutral-300">
-        <BellRing size={18} aria-hidden="true" className="text-sky-500" />
+      <p className="flex items-center gap-2 text-[14px] text-foreground/80">
+        <BellRing size={18} aria-hidden="true" className="text-brand" />
         เปิดการแจ้งเตือนบนเบราว์เซอร์แล้ว (ทำงานเมื่อเปิดหน้าเว็บค้างไว้)
       </p>
     );
   }
   if (browserPermission === "denied") {
     return (
-      <p className="flex items-center gap-2 text-[13px] text-neutral-500 home-dark:text-neutral-400">
+      <p className="flex items-center gap-2 text-[13px] text-muted">
         <BellOff size={18} aria-hidden="true" />
         การแจ้งเตือนถูกบล็อก เปิดได้ที่ไอคอนแม่กุญแจข้างแถบที่อยู่เว็บ
       </p>

@@ -133,9 +133,9 @@ const tones: Record<BadgeStatus, { light: string; dark: string }> = {
   scheduled: { light: "#2563eb", dark: "#60a5fa" },
   progress: { light: "#f97316", dark: "#fb923c" },
   priority: { light: "#e5484d", dark: "#ff6b6b" },
-  ready: { light: "#0d9488", dark: "#2dd4bf" },
-  waiting: { light: "#c026d3", dark: "#e879f9" },
-  paused: { light: "#d97706", dark: "#fbbf24" },
+  ready: { light: "#2f855a", dark: "#5fcf8a" },
+  waiting: { light: "#8a7f6a", dark: "#b3a98f" },
+  paused: { light: "#b7791f", dark: "#e0b04a" },
   reviewing: { light: "#0891b2", dark: "#22d3ee" },
   // แก้จากต้นฉบับ InitStudio: สีของสถานะที่เพิ่มใหม่ (สีระดับฝุ่นตามกรมควบคุมมลพิษ)
   offline: { light: "#737373", dark: "#a3a3a3" },
@@ -158,7 +158,7 @@ export function StatusBadge({ status, children, className }: StatusBadgeProps) {
     <span
       style={{ "--tone-light": tone.light, "--tone-dark": tone.dark } as CSSProperties}
       className={cn(
-        "inline-flex min-h-[34px] items-center gap-[7px] whitespace-nowrap rounded-[11px] pl-2.5 pr-[13px] text-[14px] font-semibold leading-none [--badge-cut:#fff] [--tone:var(--tone-light)] home-dark:[--badge-cut:#111] home-dark:[--tone:var(--tone-dark)]",
+        "inline-flex min-h-[30px] items-center gap-[7px] whitespace-nowrap rounded-md pl-2 pr-3 text-[13px] font-semibold leading-none [--badge-cut:#fff] [--tone:var(--tone-light)] home-dark:[--badge-cut:#111] home-dark:[--tone:var(--tone-dark)]",
         "bg-[color-mix(in_srgb,var(--tone)_11%,var(--background))] text-[color-mix(in_srgb,var(--tone)_88%,var(--foreground))] home-dark:bg-[color-mix(in_srgb,var(--tone)_16%,var(--background))] home-dark:text-(--tone)",
         className,
       )}

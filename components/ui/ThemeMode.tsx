@@ -29,7 +29,7 @@ export function ThemeMode({ value, defaultValue = "light", onValueChange, classN
 
   return (
     // แก้จากต้นฉบับ InitStudio: aria-label และ title เป็นภาษาไทย
-    <div role="group" aria-label="เลือกธีม" className={cn("inline-flex gap-1 rounded-full bg-neutral-200/70 p-1 home-dark:bg-white/10", className)}>
+    <div role="group" aria-label="เลือกธีม" className={cn("inline-flex gap-0.5 rounded-lg border border-line bg-surface p-0.5", className)}>
       {modes.map(({ value: mode, label, icon: Icon }) => (
         <button
           key={mode}
@@ -38,7 +38,7 @@ export function ThemeMode({ value, defaultValue = "light", onValueChange, classN
           title={mode === "system" ? "ตามระบบ — ใช้โหมดสว่าง/มืดตามที่ตั้งไว้ในเครื่อง" : label}
           aria-pressed={selected === mode}
           onClick={() => { setInternalValue(mode); onValueChange?.(mode); }}
-          className="relative grid size-11 cursor-pointer place-items-center rounded-full text-neutral-500 outline-none hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 aria-pressed:text-neutral-900 home-dark:text-neutral-400 home-dark:hover:text-white home-dark:aria-pressed:text-white"
+          className="relative grid size-8 cursor-pointer place-items-center rounded-md text-muted outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 aria-pressed:text-brand-fg home-dark:hover:text-foreground"
         >
           {selected === mode && (
             <motion.span
@@ -46,10 +46,10 @@ export function ThemeMode({ value, defaultValue = "light", onValueChange, classN
               layoutId={reduced ? undefined : `${id}-theme-indicator`}
               initial={false}
               transition={reduced ? { duration: 0 } : { type: "spring", duration: 0.35, bounce: 0 }}
-              className="absolute inset-0 rounded-full bg-white shadow-[0_1px_3px_rgb(0_0_0/0.14),0_0_0_1px_rgb(0_0_0/0.05)] home-dark:bg-neutral-700 home-dark:shadow-[0_1px_3px_rgb(0_0_0/0.3),0_0_0_1px_rgb(255_255_255/0.06)]"
+              className="absolute inset-0 rounded-md bg-brand"
             />
           )}
-          <Icon aria-hidden="true" size={22} strokeWidth={1.8} className="relative" />
+          <Icon aria-hidden="true" size={18} strokeWidth={2} className="relative" />
         </button>
       ))}
     </div>

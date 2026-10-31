@@ -1,6 +1,6 @@
 "use client";
 
-// การ์ดค่าย่อย ใช้โครงเดียวกับ LeadGoal: กรอบนอกสีเทา + การ์ดในสีขาว มุมโค้ง rounded-2xl
+// การ์ดค่าย่อย (แก้จากต้นฉบับ InitStudio: ใช้การ์ดชั้นเดียวเรียบ ๆ แทนกรอบเทาซ้อนกรอบขาว)
 import { useId, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import NumberFlow from "@number-flow/react";
@@ -17,27 +17,30 @@ export type StatCardProps = {
   className?: string;
 };
 
-export function StatCard({ title, value, unit, digits = 1, icon, accent = "#55bbfa", footer, className }: StatCardProps) {
+export function StatCard({ title, value, unit, digits = 1, icon, accent = "#b5461f", footer, className }: StatCardProps) {
   const id = useId();
   const reduced = useReducedMotion();
   return (
-    <section aria-labelledby={`${id}-title`} className={cn("flex flex-col rounded-2xl border border-neutral-200 bg-neutral-100 text-neutral-800 home-dark:border-neutral-800 home-dark:bg-neutral-800 home-dark:text-neutral-100", className)}>
-      <header className="flex h-10 items-center gap-2 px-4">
-        <h3 id={`${id}-title`} className="min-w-0 truncate text-[14px] max-sm:text-[13px] font-normal text-neutral-500 home-dark:text-neutral-400">{title}</h3>
+    <section
+      aria-labelledby={`${id}-title`}
+      className={cn("card flex flex-col gap-3 p-4 text-foreground", className)}
+    >
+      <header className="flex items-center gap-2 text-muted">
         {icon && (
-          <span aria-hidden="true" className="ml-auto grid size-6 place-items-center rounded-md [&>svg]:size-4" style={{ color: `color-mix(in srgb, ${accent} 88%, var(--foreground))` }}>
+          <span aria-hidden="true" className="grid shrink-0 place-items-center [&>svg]:size-4" style={{ color: `color-mix(in srgb, ${accent} 75%, var(--foreground))` }}>
             {icon}
           </span>
         )}
+        <h3 id={`${id}-title`} className="min-w-0 text-[13px] leading-tight font-medium">{title}</h3>
       </header>
-      <div className="-mx-px -mb-px flex flex-1 flex-col justify-center rounded-2xl border border-neutral-200 bg-white px-4 py-4 shadow-xs home-dark:border-neutral-800 home-dark:bg-neutral-900">
+      <div>
         <p className="flex items-baseline gap-1.5">
-          <span className="text-[28px] leading-none font-semibold tracking-tight tabular-nums">
+          <span className="text-[30px] leading-none font-semibold tracking-tight tabular-nums">
             {value === null ? "–" : <NumberFlow value={value} animated={!reduced} locales="th-TH" format={{ minimumFractionDigits: digits, maximumFractionDigits: digits }} />}
           </span>
-          <span className="text-[14px] text-neutral-500 home-dark:text-neutral-400">{unit}</span>
+          <span className="text-[13px] text-muted">{unit}</span>
         </p>
-        {footer && <div className="mt-2 text-[12px] text-neutral-500 home-dark:text-neutral-400">{footer}</div>}
+        {footer && <div className="mt-2 text-[12px] leading-snug text-muted">{footer}</div>}
       </div>
     </section>
   );

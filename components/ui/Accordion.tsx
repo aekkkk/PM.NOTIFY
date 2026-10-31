@@ -78,7 +78,7 @@ export function Accordion({
 
   return (
     <AccordionContext.Provider value={{ expandedValues, toggleValue, type }}>
-      <div className={cn("w-full divide-y divide-foreground/10 border-y border-foreground/10", className)}>
+      <div className={cn("w-full divide-y divide-line border-y border-line", className)}>
         {children}
       </div>
     </AccordionContext.Provider>
@@ -129,14 +129,14 @@ export function AccordionTrigger({ children, icon, className }: AccordionTrigger
         aria-expanded={isOpen}
         onClick={() => ctx.toggleValue(itemCtx.value)}
         className={cn(
-          "group flex w-full items-center justify-between gap-4 py-4 text-left transition-all select-none hover:text-foreground active:scale-[0.998]",
+          "group flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand transition-all select-none hover:text-foreground active:scale-[0.998]",
           className
         )}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           {icon ? (
             <span
-              className="flex size-5 shrink-0 items-center justify-center text-[#E83A00] transition-transform duration-200 group-hover:scale-105"
+              className="flex size-5 shrink-0 items-center justify-center text-brand transition-transform duration-200 group-hover:scale-105"
               aria-hidden="true"
             >
               {icon}
@@ -148,7 +148,7 @@ export function AccordionTrigger({ children, icon, className }: AccordionTrigger
         </div>
 
         <span
-          className="flex size-6 shrink-0 items-center justify-center text-[#E83A00] transition-transform duration-200 ease-out"
+          className="flex size-6 shrink-0 items-center justify-center text-brand transition-transform duration-200 ease-out"
           aria-hidden="true"
         >
           <Plus

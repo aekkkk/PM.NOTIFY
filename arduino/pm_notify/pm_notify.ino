@@ -1,9 +1,9 @@
 /*
   PM.Notify — โค้ดสำหรับบอร์ด Seeed Studio XIAO ESP32-C6
-  อ่านค่าฝุ่น (PMSA003) + อุณหภูมิ/ความชื้น (BME280) แล้วส่ง JSON ขึ้น Firebase Realtime Database
+  อ่านค่าฝุ่น (PMSA003) + อุณหภูมิ/ความชื้น/ความกดอากาศ (BME280) แล้วส่ง JSON ขึ้น Firebase Realtime Database
     PUT  /devices/pmnotify-01/latest.json   ← ค่าล่าสุด (เขียนทับ)
     POST /devices/pmnotify-01/history.json  ← ต่อท้ายประวัติ (Firebase สร้าง pushId ให้)
-  ระหว่างรอบเครื่องจะ Deep Sleep เพื่อประหยัดแบตเตอรี่
+  ทำงานตาม flowchart: แบตปกติรอ 2 นาทีแล้ววนรอบใหม่ แบตต่ำกว่า 30% เข้า Deep Sleep
 
   ไลบรารีที่ต้องติดตั้ง (Library Manager):
     - Adafruit BME280 Library (และ Adafruit Unified Sensor)
@@ -33,7 +33,7 @@ const char* FIREBASE_URL = "https://YOUR-PROJECT-default-rtdb.asia-southeast1.fi
 const char* FIREBASE_SECRET = "ใส่ database secret";
 const char* DEVICE_ID = "pmnotify-01";
 
-const uint32_t SEND_EVERY_SEC = 2 * 60;      // ส่งทุก 2 นาที (เลือกได้ 1–5 นาที)
+const uint32_t SEND_EVERY_SEC = 2 * 60;      // รอรอบละ 2 นาที (เลือกได้ 1–5 นาที)
 const uint32_t LOW_BATT_SLEEP_SEC = 30 * 60; // แบตต่ำกว่า 30% → หลับนาน 30 นาที
 const uint32_t PM_WARMUP_MS = 30000;         // พัดลมเซนเซอร์ฝุ่นต้องหมุนก่อน ~30 วินาทีให้ค่านิ่ง
 
@@ -96,6 +96,28 @@ void showOled(const char* line1, const char* line2) {
   oled.sendBuffer();
 }
 
+// แสดงทุกค่าที่วัดได้บนจอเดียว: ฝุ่น 3 ค่า, อุณหภูมิ, ความชื้น, ความกดอากาศ, แบตเตอรี่
+// offline = true จะเปลี่ยนหัวจอเป็น OFFLINE (ต่อ Wi-Fi ไม่ได้) แต่ยังโชว์ค่าครบ
+void showValues(float pm1, float pm25, float pm10, float temperature, float humidity, float pressure, int battery, bool offline) {
+  char buf[32];
+  oled.clearBuffer();
+  oled.setFont(u8g2_font_6x10_tf);
+  oled.drawStr(0, 9, offline ? "OFFLINE" : "PM.Notify");
+  snprintf(buf, sizeof(buf), "Batt %d%%", battery);
+  oled.drawStr(128 - oled.getStrWidth(buf), 9, buf);
+  oled.setFont(u8g2_font_logisoso16_tf);
+  snprintf(buf, sizeof(buf), "PM2.5 %.1f", pm25);
+  oled.drawStr(0, 31, buf);
+  oled.setFont(u8g2_font_6x10_tf);
+  snprintf(buf, sizeof(buf), "PM1.0 %.1f PM10 %.1f", pm1, pm10);
+  oled.drawStr(0, 43, buf);
+  snprintf(buf, sizeof(buf), "%.1fC  %.0f%%RH", temperature, humidity);
+  oled.drawStr(0, 53, buf);
+  snprintf(buf, sizeof(buf), "%.1f hPa", pressure);
+  oled.drawStr(0, 63, buf);
+  oled.sendBuffer();
+}
+
 bool connectWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -124,52 +146,67 @@ void goToSleep(uint32_t seconds) {
   esp_deep_sleep_start(); // ถ้าไม่ตั้งเวลาปลุก = ปิดระบบจนกว่าจะกดรีเซ็ต
 }
 
+bool timeReady = false; // ตั้งเวลา NTP แล้วหรือยัง (ทำครั้งเดียวหลังต่อ Wi-Fi ได้)
+
 void setup() {
   Serial.begin(115200);
   Wire.begin();
   oled.begin();
   pmSerial.begin(9600, SERIAL_8N1, D7, D6);
-  bool bmeOk = bme.begin(0x76) || bme.begin(0x77);
+  bme.begin(0x76) || bme.begin(0x77);
+}
 
+// หนึ่งรอบการทำงานตาม flowchart: เชื่อม Wi-Fi → อ่านแบต → อ่านเซนเซอร์ → แสดงผล → ส่ง Firebase → หลับ/รอ
+void loop() {
+  // 1) เชื่อมต่อ Wi-Fi (ถ้าหลุดจะต่อใหม่ทุกรอบ)
+  bool wifiOk = WiFi.status() == WL_CONNECTED || connectWifi();
+
+  // 2) อ่านระดับแบตเตอรี่ ต่ำกว่า 10% → ปิดระบบ
   int battery = readBatteryPercent();
-  // แบตต่ำกว่า 10% → ปิดระบบเพื่อถนอมแบตเตอรี่
   if (battery < 10) {
     showOled("LOW BATT", "Shutting down");
     delay(2000);
     goToSleep(0);
   }
 
+  // 3) อ่านฝุ่นจาก PMSA003 และอุณหภูมิ/ความชื้นจาก BME280
   showOled("...", "Warming up sensor");
   delay(PM_WARMUP_MS);
 
   float pm1, pm25, pm10;
   if (!readPmAverage(pm1, pm25, pm10)) {
     showOled("PM ERR", "Check PMSA003 wiring");
-    goToSleep(SEND_EVERY_SEC);
+    delay(SEND_EVERY_SEC * 1000UL);
+    return;
   }
   // ถ้าอ่าน BME280 ไม่ได้ ส่ง 0 แทน (ค่า NaN ทำให้ JSON ใช้ไม่ได้)
-  float temperature = bmeOk ? bme.readTemperature() : 0;
-  float humidity = bmeOk ? bme.readHumidity() : 0;
+  float temperature = isnan(bme.readTemperature()) ? 0 : bme.readTemperature();
+  float humidity = isnan(bme.readHumidity()) ? 0 : bme.readHumidity();
+  // ความกดอากาศ BME280 คืนค่าเป็นปาสกาล หารร้อยให้เป็น hPa (ปกติระดับน้ำทะเล ~1013 hPa)
+  float pressure = isnan(bme.readPressure()) ? 0 : bme.readPressure() / 100.0f;
 
-  char line1[24], line2[32];
-  snprintf(line1, sizeof(line1), "%.1f ug", pm25);
-  snprintf(line2, sizeof(line2), "%.1fC %.0f%%RH Batt %d%%", temperature, humidity, battery);
-  showOled(line1, line2);
+  // 4) แสดงค่าบนจอ OLED
+  showValues(pm1, pm25, pm10, temperature, humidity, pressure, battery, false);
 
-  bool lowBattery = battery < 30; // รอบสุดท้ายก่อนเข้า Deep Sleep ยาว
-  if (connectWifi()) {
-    // ขอเวลาจริงจากอินเทอร์เน็ต (เขตเวลาไทย UTC+7)
-    configTime(7 * 3600, 0, "pool.ntp.org", "time.google.com");
+  bool lowBattery = battery < 30;
+
+  // 5) Wi-Fi ได้ → ส่ง Firebase / ไม่ได้ → แสดงสถานะออฟไลน์บน OLED
+  if (wifiOk) {
+    if (!timeReady) {
+      // ขอเวลาจริงจากอินเทอร์เน็ต (เขตเวลาไทย UTC+7)
+      configTime(7 * 3600, 0, "pool.ntp.org", "time.google.com");
+      timeReady = true;
+    }
     struct tm now;
     char ts[32] = "";
     if (getLocalTime(&now, 10000)) strftime(ts, sizeof(ts), "%Y-%m-%dT%H:%M:%S+07:00", &now);
 
     // สร้าง JSON ตามรูปแบบที่เว็บไซต์ต้องการ
-    char json[320];
+    char json[352];
     snprintf(json, sizeof(json),
              "{\"device_id\":\"%s\",\"timestamp\":\"%s\",\"pm1\":%.1f,\"pm25\":%.1f,\"pm10\":%.1f,"
-             "\"temperature\":%.1f,\"humidity\":%.1f,\"battery\":%d,\"status\":\"%s\"}",
-             DEVICE_ID, ts, pm1, pm25, pm10, temperature, humidity, battery, lowBattery ? "deep_sleep" : "online");
+             "\"temperature\":%.1f,\"humidity\":%.1f,\"pressure\":%.1f,\"battery\":%d,\"status\":\"%s\"}",
+             DEVICE_ID, ts, pm1, pm25, pm10, temperature, humidity, pressure, battery, lowBattery ? "deep_sleep" : "online");
     Serial.println(json);
 
     if (ts[0]) { // ส่งเฉพาะเมื่อได้เวลาที่ถูกต้อง ไม่อย่างนั้นเว็บจะเรียงข้อมูลผิด
@@ -179,11 +216,10 @@ void setup() {
     }
   } else {
     Serial.println("Wi-Fi connect failed");
+    showValues(pm1, pm25, pm10, temperature, humidity, pressure, battery, true);
   }
 
-  goToSleep(lowBattery ? LOW_BATT_SLEEP_SEC : SEND_EVERY_SEC);
-}
-
-void loop() {
-  // ไม่ใช้ loop เพราะทุกรอบเครื่องตื่นจาก Deep Sleep แล้วเริ่ม setup() ใหม่
+  // 6) แบตต่ำกว่า 30% → Deep Sleep / ไม่ใช่ → รอ 1–5 นาทีแล้ววนรอบใหม่
+  if (lowBattery) goToSleep(LOW_BATT_SLEEP_SEC);
+  delay(SEND_EVERY_SEC * 1000UL);
 }

@@ -47,6 +47,12 @@ export function countToday(events: Exceedance[], now: number) {
 }
 
 // ย่อจำนวนจุดให้กราฟไม่หนักเกินไป โดยเฉลี่ยค่าในแต่ละช่วง
+// เฉลี่ยความกดอากาศโดยข้ามค่า 0 (ไม่มีข้อมูล) ถ้าทั้งช่วงไม่มีค่าเลยให้ 0
+function avgPressure(group: Reading[]) {
+  const valid = group.filter((r) => r.pressure > 0);
+  return valid.length ? Math.round((valid.reduce((sum, r) => sum + r.pressure, 0) / valid.length) * 10) / 10 : 0;
+}
+
 export function downsample(history: Reading[], maxPoints: number) {
   if (history.length <= maxPoints) return history;
   const size = Math.ceil(history.length / maxPoints);
@@ -55,15 +61,15 @@ export function downsample(history: Reading[], maxPoints: number) {
     const group = history.slice(i, i + size);
     const avg = (key: "pm1" | "pm25" | "pm10" | "temperature" | "humidity") =>
       Math.round((group.reduce((sum, r) => sum + r[key], 0) / group.length) * 10) / 10;
-    out.push({ ...group[group.length - 1], pm1: avg("pm1"), pm25: avg("pm25"), pm10: avg("pm10"), temperature: avg("temperature"), humidity: avg("humidity") });
+    out.push({ ...group[group.length - 1], pm1: avg("pm1"), pm25: avg("pm25"), pm10: avg("pm10"), temperature: avg("temperature"), humidity: avg("humidity"), pressure: avgPressure(group) });
   }
   return out;
 }
 
 // สร้างไฟล์ CSV แล้วให้เบราว์เซอร์ดาวน์โหลด (ใส่ BOM เพื่อให้ Excel อ่านภาษาไทยได้)
 export function downloadCsv(history: Reading[]) {
-  const header = "timestamp,pm1,pm25,pm10,temperature,humidity,battery,status";
-  const rows = history.map((r) => [r.timestamp, r.pm1, r.pm25, r.pm10, r.temperature, r.humidity, r.battery, r.status].join(","));
+  const header = "timestamp,pm1,pm25,pm10,temperature,humidity,pressure,battery,status";
+  const rows = history.map((r) => [r.timestamp, r.pm1, r.pm25, r.pm10, r.temperature, r.humidity, r.pressure, r.battery, r.status].join(","));
   const blob = new Blob(["﻿" + [header, ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");

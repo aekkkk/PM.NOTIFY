@@ -3,26 +3,82 @@
 /* โหมดมืดแบบ InitStudio: ใช้ attribute data-home-theme="dark" แทน class dark */
 @custom-variant home-dark (&:where([data-home-theme="dark"], [data-home-theme="dark"] *));
 
-/* สีพื้นและสีตัวอักษร (ค่าเดียวกับ InitStudio) */
+/*
+  ธีม "อากาศใส": พื้นกระดาษอุ่น + หมึกเขียวเข้ม + สีหลักเขียวมรกต
+  (แก้จากต้นฉบับ InitStudio ที่เป็นขาว/เทา/ฟ้า) ทุกสีผ่านตัวแปรชุดนี้ จึงสลับสว่าง/มืดได้ในที่เดียว
+*/
 :root {
-  --background: #fff;
-  --foreground: #202020;
+  --background: #f5f3ee;
+  --foreground: #1c1b18;
+  --surface: #fdfcf9;
+  --surface-2: #ebe8e0;
+  --line: #dcd8cc;
+  --muted: #66635b;
+  --brand: #b5461f; /* สีเน้น: ส้มอิฐ */
+  --brand-fg: #ffffff;
+  --brand-soft: #f4e2d8;
   color-scheme: light;
 }
 
 [data-home-theme="dark"] {
-  --background: #0b0b0b;
-  --foreground: #eee;
+  --background: #111110;
+  --foreground: #ecebe6;
+  --surface: #181816;
+  --surface-2: #232321;
+  --line: #2f2f2b;
+  --muted: #a09d94;
+  --brand: #e47c52;
+  --brand-fg: #1d0e07;
+  --brand-soft: #33211a;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
   --font-sans: var(--font-geist), var(--font-anuphan), Tahoma, sans-serif;
 }
 
+/*
+  เทาเป็นโทนอุ่น (แทนเทากลางของ Tailwind) เพื่อให้ทุกที่ที่ใช้ neutral-* กลมกลืนกับพื้นกระดาษ
+  โหมดมืดยังใช้ home-dark: เหมือนเดิม
+*/
+@theme {
+  --color-neutral-50: #faf9f5;
+  --color-neutral-100: #f0eee7;
+  --color-neutral-200: #e3e0d6;
+  --color-neutral-300: #cbc8bc;
+  --color-neutral-400: #9d9a90;
+  --color-neutral-500: #66635b;
+  --color-neutral-600: #504e48;
+  --color-neutral-700: #35342f;
+  --color-neutral-800: #232220;
+  --color-neutral-900: #171715;
+  --color-neutral-950: #111110;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--brand-fg);
+}
+
+/* การ์ดทั้งเว็บ: ขอบบางบนพื้นเรียบ ไม่มีเงา */
+@layer components {
+  .card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--line);
+    background-color: var(--surface);
+  }
 }
